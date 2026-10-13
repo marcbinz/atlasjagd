@@ -57,11 +57,7 @@ body[data-style="blind"] .grat{stroke:transparent}
 /* home-screen app: sit down near the home indicator, like a native app */
 html.standalone{--top:calc(env(safe-area-inset-top,0px) + 18px);--nav:calc(env(safe-area-inset-top,0px) + 18px);--bottom:max(6px,calc(env(safe-area-inset-bottom,0px) - 8px));--sheetB:max(14px,calc(env(safe-area-inset-bottom,0px) - 8px))}
 @media (display-mode: standalone){:root{--top:calc(env(safe-area-inset-top,0px) + 18px);--nav:calc(env(safe-area-inset-top,0px) + 18px);--bottom:max(6px,calc(env(safe-area-inset-bottom,0px) - 8px));--sheetB:max(14px,calc(env(safe-area-inset-bottom,0px) - 8px))}}
-/* home-screen app: every layer spans the full physical screen (100lvh), and bottom-anchored panels are measured
-   from that edge, so no strip is left under them even if iOS reports a shorter layout viewport */
-html.standalone #map,html.standalone .page{bottom:auto;height:100lvh}
-html.standalone #card{bottom:calc(var(--bottom) + 100% - 100lvh)}
-html.standalone .ios-sheet{bottom:calc(max(8px,var(--bottom)) + 100% - 100lvh);max-height:calc(100lvh - var(--nav) - 40px)}
+
 #map{position:fixed;inset:0;width:100%;height:100%;display:block;background:var(--ocean)}
 .sphere{fill:var(--ocean)}
 .grat{fill:none;stroke:var(--ocean-deep);stroke-width:.6;vector-effect:non-scaling-stroke}
