@@ -95,6 +95,8 @@ input:focus-visible{outline:3px solid var(--target);outline-offset:1px}
 .duel>span{display:flex;flex-direction:column}
 .duel small{font-size:15px;font-weight:600;color:var(--ink-soft);letter-spacing:0}
 .duel .vs{color:var(--ink-soft)}
+#map .c.ol{stroke:#111;stroke-width:2.5}
+#map .micro.ol{stroke:#111;stroke-width:2}
 .ring{fill:none;stroke:var(--good);stroke-width:3;vector-effect:non-scaling-stroke;animation:pulse 1.1s ease-out infinite}
 @keyframes pulse{from{opacity:1}to{opacity:.15}}
 @media (prefers-reduced-motion:reduce){.ring{animation:none}.c{transition:none}}
@@ -285,9 +287,9 @@ button.cell:active{background:var(--cellP);transition:none}
 .dock .best{font-size:13px;color:var(--l2);text-align:center;margin:0 0 8px;min-height:16px}
 
 /* ---- sheets ---- */
-#dim{position:fixed;inset:0;z-index:29;background:rgba(0,0,0,.28);opacity:0;pointer-events:none}
+#dim{position:fixed;inset:0;z-index:49;background:rgba(0,0,0,.28);opacity:0;pointer-events:none}
 #dim.on{pointer-events:auto}
-.ios-sheet{position:fixed;left:8px;right:8px;bottom:max(8px,var(--bottom));z-index:30;display:none;flex-direction:column;margin:0 auto;max-width:600px;
+.ios-sheet{position:fixed;left:8px;right:8px;bottom:max(8px,var(--bottom));z-index:50;display:none;flex-direction:column;margin:0 auto;max-width:600px;
   max-height:calc(100% - env(safe-area-inset-top,0px) - 40px);border-radius:34px;color:var(--l1);touch-action:pan-y;will-change:transform}
 .ios-sheet.show,.ios-sheet.leaving{display:flex}
 .ios-sheet.detent{max-height:min(58%,560px)}
@@ -364,6 +366,37 @@ button.pill{transition:transform .2s var(--ease)}
 .alert .acts button:active{opacity:.7}
 html:not(.kbd) :focus-visible{outline:none}
 @media (prefers-reduced-motion:reduce){.switch::after,.check,.tile,.seg .thumb{transition:none}}
+/* ---- mode options sheet with sub-panes ---- */
+.opts-head{position:relative;min-height:44px;justify-content:center;padding:0 64px 6px}
+.opts-head h2{font-size:17px;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.paneback{position:absolute;left:6px;top:-4px;height:40px;display:flex;align-items:center;gap:4px;padding:0 10px 0 8px;color:var(--tint);font-size:17px;
+  opacity:0;pointer-events:none;transition:opacity .25s}
+.paneback.on{opacity:1;pointer-events:auto}
+.paneback:active{opacity:.45}
+.closex{position:absolute;right:14px;top:-2px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--l1) 9%,transparent)}
+.closex svg{width:12px;height:12px;fill:none;stroke:var(--l2);stroke-width:2.4;stroke-linecap:round}
+.closex:active{opacity:.6}
+.panes{position:relative;flex:none;height:0;overflow:hidden}
+.pane{position:absolute;inset:0;display:none;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:0 16px}
+.pane-in{display:flow-root;padding-bottom:16px}
+.pane.on{display:block}
+.pane.covered{visibility:hidden}
+.pane-in>.group:first-child,.pane-in>.subtitle+.group{margin-top:6px}
+.pane .subtitle{margin:2px 4px 6px}
+.pane .group{background:color-mix(in srgb,var(--cell) 82%,transparent)}
+.opts-foot{flex:none;padding:10px 16px 16px;box-shadow:0 -.5px 0 var(--sep)}
+.opts-foot .best{font-size:13px;color:var(--l2);text-align:center;margin:0 0 8px;min-height:16px}
+#home .page-body{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 40px)}
+/* ---- atlas category pull-down and place levels ---- */
+.pulldown{display:inline-flex;align-items:center;gap:7px;font-size:15px;font-weight:600;color:var(--tint);background:var(--tintSoft);border-radius:999px;padding:8px 14px;margin:2px 0 10px}
+.pulldown svg{width:11px;height:7px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.pulldown:active{opacity:.6}
+.ainame{font-size:24px;font-weight:700;display:flex;align-items:center;gap:8px}
+.riv.lv-good,.riv.lv-target,.riv.lv-bad,.riv.lv-new{stroke-width:3;opacity:1}
+.riv.lv-good{stroke:var(--good)} .riv.lv-target{stroke:var(--target)} .riv.lv-bad{stroke:var(--bad)} .riv.lv-new{stroke:var(--river);opacity:.6}
+.rng.lv-good{fill:var(--good);stroke:var(--good);fill-opacity:.55} .rng.lv-target{fill:var(--target);stroke:var(--target);fill-opacity:.55}
+.rng.lv-bad{fill:var(--bad);stroke:var(--bad);fill-opacity:.55}
+.pk.lv-good{fill:var(--good)} .pk.lv-target{fill:var(--target)} .pk.lv-bad{fill:var(--bad)} .pk.lv-new{fill:var(--land);stroke:var(--range)}
 </style>
 </head>
 <body>
@@ -395,96 +428,16 @@ html:not(.kbd) :focus-visible{outline:none}
   <header class="navbar"><div class="navtitle">Atlasjagd</div></header>
   <div class="page-body">
     <h1 class="large brand">Atlasjagd</h1>
-    <p class="subtitle">Wie gut kennst du die Welt?</p>
+    <p class="subtitle">Wie gut kennst du die Welt? Wähle einen Spielmodus.</p>
     <div id="modes"></div>
-
-    <div class="group">
-      <button class="cell nav" data-push="pg-region"><span class="ic" style="background:#2E8BC9">🌍</span><span class="lbl">Region</span><span class="val" id="vRegion"></span><svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5"/></svg></button>
-      <button class="cell nav" data-push="pg-format"><span class="ic" style="background:#F09A2B">⏱️</span><span class="lbl">Format</span><span class="val" id="vFormat"></span><svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5"/></svg></button>
-      <button class="cell nav" data-push="pg-play"><span class="ic" style="background:#E2513F">👥</span><span class="lbl">Spieler</span><span class="val" id="vPlay"></span><svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5"/></svg></button>
-    </div>
-
-    <div class="sechead">Karte</div>
-    <div class="group">
-      <button class="cell nav" data-push="pg-style"><span class="ic" style="background:#3FA66B">🎨</span><span class="lbl">Kartenstil</span><span class="val" id="vStyle"></span><svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5"/></svg></button>
-      <button class="cell nav" data-push="pg-proj"><span class="ic" style="background:#5B5FD6">🌐</span><span class="lbl">Projektion</span><span class="val" id="vProj"></span><svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5"/></svg></button>
-    </div>
-
-    <div class="group">
-      <div class="cell"><span class="lbl">Nur unabhängige Staaten</span><button class="switch" id="indep" role="switch" aria-checked="true" aria-label="Nur unabhängige Staaten"></button></div>
-      <div class="cell"><span class="lbl">Clever wiederholen</span><button class="switch" id="smart" role="switch" aria-checked="true" aria-label="Clever wiederholen"></button></div>
-    </div>
-    <p class="footer">„Clever wiederholen“ fragt vor allem, was du noch nicht sicher weißt.</p>
-
     <div class="group">
       <button class="cell nav" id="openAtlas"><span class="ic" style="background:#1F5F8B">🗺️</span><span class="lbl">Mein Atlas</span><span class="val" id="vAtlas"></span><svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5"/></svg></button>
       <button class="cell nav" data-push="pg-backup"><span class="ic" style="background:#8E8E93">💾</span><span class="lbl">Datensicherung</span><svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5"/></svg></button>
     </div>
   </div>
   </div>
-  <div class="dock glass">
-    <div class="best" id="bestLine"></div>
-    <button class="btn filled big" id="start">Spiel starten</button>
-  </div>
 </section>
 
-<!-- ===== sub screens (pushed) ===== -->
-<section class="page sub" id="pg-region" aria-label="Region">
-  <div class="shade"></div>
-  <div class="scroll">
-  <header class="navbar"><button class="back" data-back><svg class="backchev" viewBox="0 0 12 21" aria-hidden="true"><path d="M10 2L2 10.5 10 19"/></svg><span>Atlasjagd</span></button><div class="navtitle">Region</div></header>
-  <div class="page-body"><div class="group" id="regionList"></div></div>
-  </div>
-</section>
-<section class="page sub" id="pg-format" aria-label="Format">
-  <div class="shade"></div>
-  <div class="scroll">
-  <header class="navbar"><button class="back" data-back><svg class="backchev" viewBox="0 0 12 21" aria-hidden="true"><path d="M10 2L2 10.5 10 19"/></svg><span>Atlasjagd</span></button><div class="navtitle">Format</div></header>
-  <div class="page-body">
-    <div class="group" id="formatList"></div>
-    <div id="suddenGroup">
-      <div class="group"><div class="cell"><span class="lbl">Sudden Death</span><button class="switch" id="sudden" role="switch" aria-checked="false" aria-label="Sudden Death"></button></div></div>
-      <p class="footer">Bei „Endlos“ endet die Runde beim ersten Fehler. Ist es aus, geht es nach einem Fehler einfach weiter, bis du aufhörst.</p>
-    </div>
-  </div>
-  </div>
-</section>
-<section class="page sub" id="pg-play" aria-label="Spieler">
-  <div class="shade"></div>
-  <div class="scroll">
-  <header class="navbar"><button class="back" data-back><svg class="backchev" viewBox="0 0 12 21" aria-hidden="true"><path d="M10 2L2 10.5 10 19"/></svg><span>Atlasjagd</span></button><div class="navtitle">Spieler</div></header>
-  <div class="page-body">
-    <div class="group" id="playList"></div>
-    <div id="hotseatBox">
-      <div class="sechead">Namen</div>
-      <div class="group">
-        <label class="cell field"><span class="lbl">Spieler 1</span><input id="p1" maxlength="16" autocomplete="off" aria-label="Name Spieler 1"></label>
-        <label class="cell field"><span class="lbl">Spieler 2</span><input id="p2" maxlength="16" autocomplete="off" aria-label="Name Spieler 2"></label>
-      </div>
-      <p class="footer">Ihr spielt nacheinander dieselben Fragen in derselben Reihenfolge. Bei „Endlos“ beendet jeder seine Runde über ✕ – oder ihr schaltet Sudden Death ein.</p>
-    </div>
-    <div id="codeBox">
-      <div class="sechead">Duell-Code</div>
-      <div class="group"><label class="cell field"><input id="codeIn" placeholder="Code eingeben (optional)" autocapitalize="characters" autocomplete="off" spellcheck="false" aria-label="Duell-Code"></label></div>
-      <p class="footer">Jeder spielt auf dem eigenen Handy. Ohne Code wird ein neuer erzeugt – schick ihn deinem Gegenüber. Mit Code bekommst du exakt dieselben Fragen.</p>
-    </div>
-  </div>
-  </div>
-</section>
-<section class="page sub" id="pg-style" aria-label="Kartenstil">
-  <div class="shade"></div>
-  <div class="scroll">
-  <header class="navbar"><button class="back" data-back><svg class="backchev" viewBox="0 0 12 21" aria-hidden="true"><path d="M10 2L2 10.5 10 19"/></svg><span>Atlasjagd</span></button><div class="navtitle">Kartenstil</div></header>
-  <div class="page-body"><div class="group" id="styleList"></div><p class="footer">Im Spiel wechselst du den Stil jederzeit über 🗺️.</p></div>
-  </div>
-</section>
-<section class="page sub" id="pg-proj" aria-label="Projektion">
-  <div class="shade"></div>
-  <div class="scroll">
-  <header class="navbar"><button class="back" data-back><svg class="backchev" viewBox="0 0 12 21" aria-hidden="true"><path d="M10 2L2 10.5 10 19"/></svg><span>Atlasjagd</span></button><div class="navtitle">Projektion</div></header>
-  <div class="page-body"><div class="group" id="projList"></div><p class="footer">Flache Karten lassen sich endlos seitwärts drehen. Der Globus wird mit dem Finger gedreht.</p></div>
-  </div>
-</section>
 <section class="page sub" id="pg-backup" aria-label="Datensicherung">
   <div class="shade"></div>
   <div class="scroll">
@@ -503,6 +456,63 @@ html:not(.kbd) :focus-visible{outline:none}
 
 <!-- ===== sheets ===== -->
 <div id="dim"></div>
+<section class="ios-sheet tall" id="opts" role="dialog" aria-modal="true" aria-labelledby="optsTitle">
+  <div class="grab" aria-hidden="true"></div>
+  <div class="sheet-head opts-head">
+    <button class="paneback" id="optsBack" data-paneback aria-label="Zurück"><svg class="backchev" viewBox="0 0 12 21" aria-hidden="true"><path d="M10 2L2 10.5 10 19"/></svg><span>Optionen</span></button>
+    <h2 id="optsTitle"></h2>
+    <button class="closex" id="optsClose" aria-label="Schließen"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
+  </div>
+  <div class="panes">
+    <div class="pane on" id="pane-main">
+      <p class="subtitle" id="optsDesc"></p>
+      <div class="group">
+        <button class="cell nav" data-pane="pane-region"><span class="ic" style="background:#2E8BC9">🌍</span><span class="lbl">Region</span><span class="val" id="vRegion"></span><svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5"/></svg></button>
+        <button class="cell nav" data-pane="pane-format"><span class="ic" style="background:#F09A2B">⏱️</span><span class="lbl">Format</span><span class="val" id="vFormat"></span><svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5"/></svg></button>
+        <button class="cell nav" data-pane="pane-play"><span class="ic" style="background:#E2513F">👥</span><span class="lbl">Spieler</span><span class="val" id="vPlay"></span><svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5"/></svg></button>
+      </div>
+      <div class="sechead">Karte</div>
+      <div class="group">
+        <button class="cell nav" data-pane="pane-style"><span class="ic" style="background:#3FA66B">🎨</span><span class="lbl">Kartenstil</span><span class="val" id="vStyle"></span><svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5"/></svg></button>
+        <button class="cell nav" data-pane="pane-proj"><span class="ic" style="background:#5B5FD6">🌐</span><span class="lbl">Projektion</span><span class="val" id="vProj"></span><svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5"/></svg></button>
+      </div>
+      <div id="toggleBox">
+        <div class="group">
+          <div class="cell" id="rowIndep"><span class="lbl">Nur unabhängige Staaten</span><button class="switch" id="indep" role="switch" aria-checked="true" aria-label="Nur unabhängige Staaten"></button></div>
+          <div class="cell" id="rowSmart"><span class="lbl">Clever wiederholen</span><button class="switch" id="smart" role="switch" aria-checked="true" aria-label="Clever wiederholen"></button></div>
+        </div>
+        <p class="footer" id="smartFoot">„Clever wiederholen“ fragt vor allem, was du noch nicht sicher weißt.</p>
+      </div>
+    </div>
+    <div class="pane" id="pane-region" data-title="Region"><div class="group" id="regionList"></div></div>
+    <div class="pane" id="pane-format" data-title="Format">
+      <div class="group" id="formatList"></div>
+      <div id="suddenGroup">
+        <div class="group"><div class="cell"><span class="lbl">Sudden Death</span><button class="switch" id="sudden" role="switch" aria-checked="false" aria-label="Sudden Death"></button></div></div>
+        <p class="footer">Bei „Endlos“ endet die Runde beim ersten Fehler. Ist es aus, geht es nach einem Fehler einfach weiter, bis du aufhörst.</p>
+      </div>
+    </div>
+    <div class="pane" id="pane-play" data-title="Spieler">
+      <div class="group" id="playList"></div>
+      <div id="hotseatBox">
+        <div class="sechead">Namen</div>
+        <div class="group">
+          <label class="cell field"><span class="lbl">Spieler 1</span><input id="p1" maxlength="16" autocomplete="off" aria-label="Name Spieler 1"></label>
+          <label class="cell field"><span class="lbl">Spieler 2</span><input id="p2" maxlength="16" autocomplete="off" aria-label="Name Spieler 2"></label>
+        </div>
+        <p class="footer">Ihr spielt nacheinander dieselben Fragen in derselben Reihenfolge. Bei „Endlos“ beendet jeder seine Runde über ✕ – oder ihr schaltet Sudden Death ein.</p>
+      </div>
+      <div id="codeBox">
+        <div class="sechead">Duell-Code</div>
+        <div class="group"><label class="cell field"><input id="codeIn" placeholder="Code eingeben (optional)" autocapitalize="characters" autocomplete="off" spellcheck="false" aria-label="Duell-Code"></label></div>
+        <p class="footer">Jeder spielt auf dem eigenen Handy. Ohne Code wird ein neuer erzeugt – schick ihn deinem Gegenüber. Mit Code bekommst du exakt dieselben Fragen.</p>
+      </div>
+    </div>
+    <div class="pane" id="pane-style" data-title="Kartenstil"><div class="group" id="styleList"></div><p class="footer">Im Spiel wechselst du den Stil jederzeit über 🗺️.</p></div>
+    <div class="pane" id="pane-proj" data-title="Projektion"><div class="group" id="projList"></div><p class="footer">Flache Karten lassen sich endlos seitwärts drehen. Der Globus wird mit dem Finger gedreht.</p></div>
+  </div>
+  <div class="opts-foot"><div class="best" id="bestLine"></div><button class="btn filled big" id="start">Spiel starten</button></div>
+</section>
 <section class="ios-sheet" id="handoff" role="dialog" aria-modal="true" aria-labelledby="handTitle">
   <div class="sheet-body center">
     <div class="handicon">🔄</div>
@@ -529,7 +539,7 @@ html:not(.kbd) :focus-visible{outline:none}
   <div class="grab" aria-hidden="true"></div>
   <div class="sheet-head"><h2 id="atlasHead">Mein Atlas</h2><button class="textbtn" id="atlasBack">Fertig</button></div>
   <div class="sheet-body">
-    <div class="seg" id="atlasSkills"></div>
+    <button class="pulldown" id="atlasCat" aria-haspopup="menu"></button>
     <p class="footnote" id="atlasSum"></p>
     <div class="bar"><i id="atlasBar"></i></div>
     <div class="legend"><span><i style="background:var(--good)"></i>Sitzt</span><span><i style="background:var(--target)"></i>Wackelt</span><span><i style="background:var(--bad)"></i>Üben</span><span><i style="background:var(--land)"></i>Neu</span></div>
@@ -649,6 +659,16 @@ const zoom=d3.zoom().extent(()=>[[0,0],[W||innerWidth,H||innerHeight]]).scaleExt
       if(!raf)raf=requestAnimationFrame(()=>{raf=0;render();});
     }
   });
+// east–west is endless. North–south: the map's top and bottom edge can be pulled down to the top buttons and up to
+// the bottom panel, so places near the poles can always be moved into the free part of the screen and tapped
+function freeArea(){let top=0,bot=H;
+  const hud=document.getElementById('hud');if(hud&&hud.classList.contains('show'))top=hud.getBoundingClientRect().bottom;
+  for(const id of ['card','atlas','result']){const e=document.getElementById(id);
+    if(e&&e.classList.contains('show')){const r=e.getBoundingClientRect();if(r.height)bot=Math.min(bot,r.top);}}
+  return [top,bot];}
+function clampY(t){if(!flat)return t;const [a,b]=freeArea(), lo=Math.min(H,b-16)-t.k*flat.y1, hi=Math.max(0,a+16)-t.k*flat.y0;
+  const y=lo>hi?(lo+hi)/2:Math.min(hi,Math.max(lo,t.y));return y===t.y?t:d3.zoomIdentity.translate(t.x,y).scale(t.k);}
+zoom.constrain(t=>clampY(t));
 svg.call(zoom).on('dblclick.zoom',null);
 
 let flagDefs=false;
@@ -678,10 +698,16 @@ function fitProjection(){
     const make=()=>(S.proj==='equal'?d3.geoEqualEarth():S.proj==='mercator'?d3.geoMercator():d3.geoNaturalEarth1()).precision(.3);
     proj=make().rotate([R.rot||0,0]);
     proj.fitExtent(ext,R.box?boxPts(R.box):S.proj==='mercator'?boxPts([-180,-58,180,80]):{type:'Sphere'});
+    const band=S.proj==='mercator'?boxPts([-180,-85,180,85]):{type:'Sphere'};
+    let [[bx0,by0],[bx1,by1]]=d3.geoPath(proj).bounds(band);
+    const cover=Math.max(1,H/(by1-by0),W/(bx1-bx0));
+    if(cover>1){proj.scale(proj.scale()*cover);[[bx0,by0],[bx1,by1]]=d3.geoPath(proj).bounds(band);
+      const [ux,uy]=proj.translate();proj.translate([ux,uy+H/2-(by0+by1)/2]);[[bx0,by0],[bx1,by1]]=d3.geoPath(proj).bounds(band);}
     const [tx,ty]=proj.translate(), c=-(R.rot||0);
-    flat={make,s:proj.scale(),tx,ty,rot:R.rot||0,ppd:proj([c+1,0])[0]-proj([c,0])[0]};
+    flat={make,s:proj.scale(),tx,ty,rot:R.rot||0,ppd:proj([c+1,0])[0]-proj([c,0])[0],y0:by0,y1:by1};
     flat.at=l=>flat.make().rotate([l,0]).scale(flat.s).translate([flat.tx,flat.ty]);
   }
+  zoom.scaleExtent([isGlobe()?.6:1,90]);
   path=d3.geoPath(proj);
   micros=gM.selectAll('circle').data(FEATS.filter(f=>microSet.has(f.uid)),f=>f.uid).join('circle').attr('class','micro');
   K=1;svg.interrupt().call(zoom.transform,d3.zoomIdentity);
@@ -712,7 +738,8 @@ function paint(){
   if(st==='flags'&&!atlasMode)ensureFlags();
   const showOut=S.region!=='WORLD';
   const apply=function(f){const m=marks.get(f.uid), out=showOut&&!inRegion(f,S.region);
-    this.setAttribute('class',this.dataset.k+(m?' '+m:out?' out':''));
+    const ol=G&&(S.mode==='capital'||S.mode==='name')&&G.target&&G.target.uid===f.uid;
+    this.setAttribute('class',this.dataset.k+(m?' '+m:out?' out':'')+(ol?' ol':''));
     const bf=m?null:baseFill(f);this.style.fill=bf||'';this.style.opacity=(!m&&out&&bf)?'.4':'';};
   paths.each(function(f){this.dataset.k='c';apply.call(this,f);});
   micros.each(function(f){this.dataset.k='micro';apply.call(this,f);});
@@ -750,7 +777,7 @@ function zoomToFeature(f,dur=650){
   const k=Math.max(1,Math.min(kFit,kCtx,90)), vx=(v.x0+v.x1)/2, vy=(v.y0+v.y1)/2;
   const lam2=lam+(flat.tx+(vx-flat.tx)/k-(x0+x1)/2)/flat.ppd;
   const bx=(lam2-flat.rot)*k*flat.ppd;
-  svg.transition().duration(reduce?0:dur).call(zoom.transform,d3.zoomIdentity.translate(flat.tx*(1-k)+bx,vy-k*(y0+y1)/2).scale(k));
+  svg.transition().duration(reduce?0:dur).call(zoom.transform,clampY(d3.zoomIdentity.translate(flat.tx*(1-k)+bx,vy-k*(y0+y1)/2).scale(k)));
 }
 function resetView(dur=500){svg.transition().duration(reduce?0:dur).call(zoom.transform,d3.zoomIdentity);}
 function ring(f){gR.selectAll('*').remove();if(!f)return;gR.append('circle').datum({r:22,f}).attr('class','ring');placeMarks();}
@@ -813,7 +840,7 @@ function anim(el,frames,opt){
 function done(el,a){if(a&&a.cancel)a.cancel();}
 
 /* show(id,on) is the one switch the game uses for every screen, sheet and overlay */
-const SHEETS={result:{dim:true,dismiss:()=>$('toMenu').click()},atlas:{dim:false,dismiss:()=>$('atlasBack').click()},handoff:{dim:true}};
+const SHEETS={opts:{dim:true,dismiss:()=>show('opts',false)},result:{dim:true,dismiss:()=>$('toMenu').click()},atlas:{dim:false,dismiss:()=>$('atlasBack').click()},handoff:{dim:true}};
 function show(id,on=true){
   const el=$(id);if(!el)return;
   if(el.classList.contains('show')===on)return;
@@ -899,7 +926,7 @@ function sheetIn(el,cfg){
 }
 function sheetOut(el,cfg){
   const cur=el.style.transform||'translateY(0)';el.style.transform='';
-  if(cfg.dim&&!['result','handoff'].some(id=>id!==el.id&&$(id).classList.contains('show'))){const d=$('dim');d.classList.remove('on');anim(d,[{opacity:1},{opacity:0}],{duration:300,easing:EASE_IN});}
+  if(cfg.dim&&!['opts','result','handoff'].some(id=>id!==el.id&&$(id).classList.contains('show'))){const d=$('dim');d.classList.remove('on');anim(d,[{opacity:1},{opacity:0}],{duration:300,easing:EASE_IN});}
   leaveThen(el,anim(el,[{transform:cur},{transform:'translateY(calc(100% + 40px))'}],{duration:340,easing:EASE_IN}));
 }
 Object.entries(SHEETS).forEach(([id,cfg])=>{
@@ -974,6 +1001,48 @@ function choiceList(id,obj,cur,on,extra){
   el.querySelectorAll('.cell').forEach(b=>b.setAttribute('aria-checked',b.dataset.k===cur));
 }
 
+/* --- options sheet: panes slide like a navigation stack inside the sheet,
+       and the sheet morphs to the height of the pane it shows (never taller than its content) --- */
+document.querySelectorAll('.pane').forEach(p=>{const w=document.createElement('div');w.className='pane-in';while(p.firstChild)w.append(p.firstChild);p.append(w);});
+function fitPanes(animate,pane){
+  const sh=$('opts'), box=sh.querySelector('.panes');if(!sh.classList.contains('show'))return;
+  const p=pane||$(PANE.stack[PANE.stack.length-1]);
+  const chrome=sh.offsetHeight-box.offsetHeight, maxH=parseFloat(getComputedStyle(sh).maxHeight)||innerHeight*.9;
+  const target=Math.round(Math.max(60,Math.min(p.querySelector('.pane-in').offsetHeight,maxH-chrome)));
+  const from=box.offsetHeight;box.style.height=target+'px';
+  if(animate&&Math.abs(from-target)>1)anim(box,[{height:from+'px'},{height:target+'px'}],{duration:420,easing:EASE}).then(a=>done(box,a));
+}
+addEventListener('resize',()=>fitPanes(false));
+const PANE={stack:['pane-main'],busy:false};
+function optsHead(){const top=$(PANE.stack[PANE.stack.length-1]);
+  $('optsTitle').textContent=top.dataset.title||`${MODES[S.mode].ic} ${MODES[S.mode].name}`;$('optsBack').classList.toggle('on',PANE.stack.length>1);}
+function panePush(id){
+  if(PANE.busy||PANE.stack.includes(id))return;
+  const from=$(PANE.stack[PANE.stack.length-1]), to=$(id);PANE.stack.push(id);to.scrollTop=0;to.classList.add('on');optsHead();fitPanes(true,to);PANE.busy=true;
+  const o={duration:420,easing:EASE};
+  Promise.all([anim(to,[{transform:'translateX(100%)'},{transform:'translateX(0)'}],o),anim(from,[{transform:'translateX(0)',opacity:1},{transform:'translateX(-30%)',opacity:0}],o)])
+    .then(([a,b])=>{from.classList.add('covered');done(to,a);done(from,b);PANE.busy=false;});
+}
+function panePop(){
+  if(PANE.busy||PANE.stack.length<2)return;
+  const from=$(PANE.stack.pop()), to=$(PANE.stack[PANE.stack.length-1]);to.classList.remove('covered');optsHead();fitPanes(true,to);PANE.busy=true;
+  document.activeElement&&document.activeElement.blur&&document.activeElement.blur();
+  const o={duration:380,easing:EASE};
+  Promise.all([anim(from,[{transform:'translateX(0)'},{transform:'translateX(100%)'}],o),anim(to,[{transform:'translateX(-30%)',opacity:0},{transform:'translateX(0)',opacity:1}],o)])
+    .then(([a,b])=>{from.classList.remove('on');done(from,a);done(to,b);PANE.busy=false;});
+}
+function paneReset(){
+  while(PANE.stack.length>1){const p=$(PANE.stack.pop());p.classList.remove('on');if(p._anim){p._anim.cancel();p._anim=null;}}
+  const m=$('pane-main');m.classList.remove('covered');if(m._anim){m._anim.cancel();m._anim=null;}m.scrollTop=0;PANE.busy=false;optsHead();fitPanes(false);
+}
+function openOpts(){paneReset();renderHome();show('opts');fitPanes(false);}
+document.addEventListener('click',e=>{
+  const p=e.target.closest('[data-pane]');if(p){panePush(p.dataset.pane);return;}
+  if(e.target.closest('[data-paneback]'))panePop();
+});
+$('optsClose').onclick=()=>show('opts',false);
+$('dim').addEventListener('click',()=>{if($('opts').classList.contains('show'))show('opts',false);});
+
 /* ---------- places: rivers, mountains, landmarks ---------- */
 const inBox=(pt,b)=>{let x=pt[0];if(b[2]>180&&x<b[0])x+=360;return x>=b[0]&&x<=b[2]&&pt[1]>=b[1]&&pt[1]<=b[3];};
 const PLACES={};
@@ -991,11 +1060,11 @@ function placeDist(t,ll){
   let m=Infinity;const walk=c=>{if(typeof c[0]==='number'){const d=d3.geoDistance(ll,c);if(d<m)m=d;}else c.forEach(walk);};
   walk(g.coordinates);return m*6371;
 }
-function drawPlaces(list){
+function drawPlaces(list,o={}){
   gP.selectAll('*').remove();if(!list||!list.length)return;
   gP.selectAll('path').data(list.filter(f=>f.geometry.type!=='Point'),f=>f.uid).join('path')
     .attr('class',f=>f.kind==='river'?'riv':'rng').attr('d',path);
-  gP.selectAll('circle').data(list.filter(f=>f.p.k==='peak'),f=>f.uid).join('circle').attr('class','pk');
+  gP.selectAll('circle').data(list.filter(f=>f.p.k==='peak'||(o.points&&f.geometry.type==='Point')),f=>f.uid).join('circle').attr('class','pk');
   placeMarks();
 }
 function markPlace(f,cls){gP.selectAll('path,circle').filter(d=>d===f).classed(cls,true).raise();}
@@ -1054,12 +1123,15 @@ function renderModes(){
     for(const [k,m] of Object.entries(MODES)){
       if(m.group!==grp){grp=m.group;const h=document.createElement('div');h.className='sechead';h.textContent=grp;box.append(h);grid=document.createElement('div');grid.className='tiles';box.append(grid);}
       const b=document.createElement('button');b.className='tile';b.dataset.k=k;
-      b.innerHTML=`<span class="ic" aria-hidden="true">${m.ic}</span><b>${m.name}</b><span class="d">${m.desc}</span><span class="tick" aria-hidden="true"><svg viewBox="0 0 16 13"><path d="M1.5 7l4.5 4.5L14.5 1.5"/></svg></span>`;
-      b.onclick=()=>{if(S.mode===k)return;S.mode=k;persist();renderHome();};grid.append(b);}}
-  box.querySelectorAll('.tile').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===S.mode));
+      b.innerHTML=`<span class="ic" aria-hidden="true">${m.ic}</span><b>${m.name}</b><span class="d">${m.desc}</span>`;
+      b.onclick=()=>{S.mode=k;persist();openOpts();};grid.append(b);}}
 }
 function renderHome(){
-  renderModes();
+  renderModes();optsHead();
+  $('optsDesc').textContent=MODES[S.mode].desc;
+  const noIndep=!!PLACE_MODE[S.mode], noSmart=!SKILL[S.mode];
+  $('rowIndep').style.display=noIndep?'none':'';$('rowSmart').style.display=noSmart?'none':'';
+  $('smartFoot').style.display=noSmart?'none':'';$('toggleBox').style.display=noIndep&&noSmart?'none':'';
   $('vRegion').textContent=REGIONS[S.region].name;
   $('vFormat').textContent=FORMATS[S.format].name+(S.format==='endless'&&S.sudden?' · Sudden Death':'');
   $('vPlay').textContent=PLAY[S.play].name;
@@ -1079,6 +1151,7 @@ function renderHome(){
   $('indep').setAttribute('aria-checked',S.indep);$('smart').setAttribute('aria-checked',S.smart);$('sudden').setAttribute('aria-checked',!!S.sudden);
   $('start').textContent=S.play==='solo'?'Spiel starten':'Duell starten';
   const P=pool(), best=BEST[bestKey()], sk=SKILL[S.mode], unit=PLACE_MODE[S.mode]?'Ziele':'Länder';
+  requestAnimationFrame(()=>fitPanes(true));
   $('bestLine').textContent=`${MODES[S.mode].name} · ${P.length} ${unit}`+(sk?` · ${mastered(sk,P)} sicher`:'')+(best!=null&&S.play==='solo'?` · Rekord ${best}`:'');
 }
 function persist(){save('settings',S)}
@@ -1116,7 +1189,7 @@ function beginRound(){
   G={P,total,unique:!!total,history:[],score:0,streak:0,bestStreak:0,lives:3,missed:[],time:TIME(),locked:false,timer:null,
     rng:duel?mulberry(DUEL.seed):Math.random,smart:S.smart&&!duel,noRecord:DUEL&&DUEL.kind==='hotseat',
     sudden:S.format==='endless'&&!!S.sudden,player:DUEL&&DUEL.kind==='hotseat'?(DUEL.turn?S.p2:S.p1):null};
-  atlasMode=false;['home','result','atlas','handoff'].forEach(id=>show(id,false));show('hud');show('card');
+  atlasMode=false;['opts','home','result','atlas','handoff'].forEach(id=>show(id,false));show('hud');show('card');
   marks.clear();ring(null);paint();resetView(0);
   drawPlaces(PLACE_MODE[S.mode]?P:null);
   if(S.format==='time')G.timer=setInterval(()=>{if(G.paused)return;G.time--;hud();if(G.time<=0)endGame();},1000);
@@ -1150,8 +1223,8 @@ function nextQ(){
   const subj=$('subject');subj.className='';subj.textContent='';
   if(S.mode==='borderhop')return nextHop();
   const f=pick(), m=S.mode;G.history.push(f);G.target=f;
-  if(m==='find'){$('ask').textContent='Wo liegt';subj.textContent=f.p.n;}
-  if(m==='flag'){$('ask').textContent='Wo liegt dieses Land?';subj.innerHTML=flagImg(f,'flagbig');}
+  if(m==='find'){$('ask').textContent='Wo liegt';subj.textContent=f.p.n;resetView();}
+  if(m==='flag'){$('ask').textContent='Wo liegt dieses Land?';subj.innerHTML=flagImg(f,'flagbig');resetView();}
   if(m==='flagquiz'){$('ask').textContent='Welches Land hat diese Flagge?';subj.innerHTML=flagImg(f,'flagbig');resetView();}
   if(m==='silhouette'){$('ask').textContent='Welches Land hat diesen Umriss?';subj.innerHTML=silhouette(f);resetView();}
   if(m==='name'){$('ask').textContent='Welches Land ist markiert?';}
@@ -1164,8 +1237,7 @@ function nextQ(){
     for(const x of shuffle(near,G.rng).concat(shuffle(all.slice(),G.rng))){if(opts.length>=4)break;if(x!==f&&!seen.has(key(x))){seen.add(key(x));opts.push(x);}}
     shuffle(opts,G.rng).forEach(o=>{const b=document.createElement('button');b.textContent=key(o);b.dataset.uid=o.uid;b.onclick=()=>answerChoice(o,b);ch.append(b);});
     ch.style.display='grid';
-    if(m==='name'||m==='capital'){marks.set(f.uid,'target');requestAnimationFrame(()=>zoomToFeature(f));
-      if(microSet.has(f.uid)||f.scattered||path.area(f)<60)ring(f);}
+    if(m==='name'||m==='capital'){marks.set(f.uid,'target');paths.filter(d=>d===f).raise();micros.filter(d=>d===f).raise();requestAnimationFrame(()=>zoomToFeature(f));}
   }
   paint();hud();
 }
@@ -1201,7 +1273,7 @@ function wrong(picked,distKm){
   if(CAT[S.mode]==='place'){
     $('feedback').innerHTML=`Daneben – <b>${esc(f.p.n)}</b> liegt ${fmt(Math.round(distKm/10)*10)} km entfernt.`;reveal(f);
   } else {
-    marks.set(f.uid,'good');if(picked&&picked!==f)marks.set(picked.uid,'bad');paint();ring(f);
+    marks.set(f.uid,'good');if(picked&&picked!==f)marks.set(picked.uid,'bad');paint();if(S.mode!=='name'&&S.mode!=='capital')ring(f);
     if(CAT[S.mode]==='tap'){
       $('feedback').innerHTML=picked?`Das war <b>${picked.p.n}</b>. ${flagImg(f)} ${f.p.n} liegt ${fmt(km(picked,f))} km entfernt.`:`Daneben. Hier liegt ${flagImg(f)} <b>${f.p.n}</b>.`;
       zoomToFeature(f);
@@ -1389,36 +1461,62 @@ $('shareCode').onclick=async()=>{
 };
 
 /* ---------- atlas / progress ---------- */
+const ATLAS={loc:{name:'Lage',ic:'📍'},flag:{name:'Flaggen',ic:'🎌'},cap:{name:'Hauptstädte',ic:'🏙️'},shape:{name:'Silhouetten',ic:'🧩'},
+  river:{name:'Flüsse',ic:'🌊',place:true},mount:{name:'Berge & Gebirge',ic:'🏔️',place:true},monu:{name:'Wahrzeichen',ic:'🏰',place:true}};
+const ATLAS_MODE={loc:'find',flag:'flagquiz',cap:'capital',shape:'silhouette',river:'rivers',mount:'mountains',monu:'monuments'};
+const KIND_NAME={river:'Fluss',range:'Gebirge',peak:'Berg',monu:'Wahrzeichen'};
 let atlasSel=null;
+const atlasPool=sk=>pool(S.region,ATLAS_MODE[sk],S.indep);
 function openAtlas(){
-  if(!SKILLS[S.atlasSkill])S.atlasSkill='loc';
+  if(!ATLAS[S.atlasSkill])S.atlasSkill='loc';
+  const sk=S.atlasSkill, A=ATLAS[sk], P=atlasPool(sk);
   show('home',false);show('result',false);show('atlas');atlasMode=true;
-  segmented('atlasSkills',{loc:'Lage',flag:'Flaggen',cap:'Städte',shape:'Umrisse'},S.atlasSkill,k=>{S.atlasSkill=k;persist();openAtlas();});
-  const sk=S.atlasSkill, P=pool(S.region,SKILL_MODE[sk],S.indep);marks.clear();
-  P.forEach(f=>{const l=level(sk,f);if(l)marks.set(f.uid,l);});
-  paint();if(!atlasSel)resetView();
+  $('atlasCat').innerHTML=`${A.ic} ${A.name}<svg viewBox="0 0 12 8" aria-hidden="true"><path d="M1.5 1.5L6 6l4.5-4.5"/></svg>`;
+  marks.clear();
+  if(A.place){drawPlaces(P,{points:true});gP.selectAll('path,circle').each(function(f){const l=level(sk,f);this.classList.add('lv-'+(l||'new'));});}
+  else{drawPlaces(null);P.forEach(f=>{const l=level(sk,f);if(l)marks.set(f.uid,l);});}
+  paint();if(!atlasSel){ring(null);resetView();}
   const m=mastered(sk,P);
-  $('atlasSum').textContent=`${SKILLS[sk]}: ${m} von ${P.length} Ländern in ${REGIONS[S.region].name} sitzen sicher.`;
+  $('atlasSum').textContent=`${A.name} in ${REGIONS[S.region].name}: ${m} von ${P.length} sitzen sicher.`;
   $('atlasBar').style.width=(P.length?m/P.length*100:0)+'%';
-  if(atlasSel)atlasInfo(atlasSel);else $('atlasInfo').innerHTML='<p class="tag" style="margin:0">Kennst du ein Land sicher, markiere es als gewusst – dann kommt es kaum noch dran.</p>';
+  if(atlasSel)atlasInfo(atlasSel);
+  else $('atlasInfo').innerHTML=`<p class="tag" style="margin:0">Tippe auf ${A.place?'einen Ort':'ein Land'}. Kennst du es sicher, markiere es als gewusst – dann kommt es kaum noch dran.</p>`;
 }
 function atlasInfo(f){
+  if(f.kind){
+    const sk=f.kind, l=level(sk,f), s=know(sk,f), known=!!(s&&s.l>=5);
+    $('atlasInfo').innerHTML=`<div class="ainame">${esc(f.p.n)}</div>
+      <p class="tag" style="margin:2px 0 8px">${KIND_NAME[f.p.k]||''} · ${l?LEVEL_NAME[l]:'Neu'}${s?` · ${s.c}× richtig, ${s.w}× falsch`:''}</p>
+      <button class="btn tinted" id="knowBtn">${known?'Wieder abfragen':'Kenne ich – kaum noch fragen'}</button>`;
+    $('knowBtn').onclick=()=>{const x=KN[sk][f.uid]||{c:0,w:0};x.l=known?1:5;KN[sk][f.uid]=x;save('know',KN);
+      toast(known?`${f.p.n} kommt wieder öfter`:`${f.p.n} als gewusst markiert`,'var(--accent)');openAtlas();};
+    return;
+  }
   const lv=sk=>{const l=level(sk,f);return `${SKILLS[sk]}: ${l?LEVEL_NAME[l]:'Neu'}`;};
   const known=Object.keys(SKILLS).every(sk=>{const s=know(sk,f);return s&&s.l>=5;});
-  $('atlasInfo').innerHTML=`<div style="font-size:26px;font-weight:800;display:flex;align-items:center;gap:8px">${flagImg(f,'flagmd')} ${f.p.n}</div>
+  $('atlasInfo').innerHTML=`<div class="ainame">${flagImg(f,'flagmd')} ${f.p.n}</div>
     <p class="tag" style="margin:2px 0 8px">${f.p.c?'Hauptstadt '+f.p.c+'<br>':''}${Object.keys(SKILLS).map(lv).join(' · ')}</p>
     <button class="btn tinted" id="knowBtn">${known?'Wieder abfragen':'Kenne ich – kaum noch fragen'}</button>`;
   $('knowBtn').onclick=()=>{for(const sk of Object.keys(SKILLS)){const s=KN[sk][f.uid]||{c:0,w:0};s.l=known?1:5;KN[sk][f.uid]=s;}
     save('know',KN);toast(known?`${f.p.n} kommt wieder öfter`:`${f.p.n} als gewusst markiert`,'var(--accent)');openAtlas();};
 }
-function atlasTap(evt){const f=hit(evt);if(!f||!quizzable(f))return;atlasSel=f;atlasInfo(f);ring(f);}
-$('openAtlas').onclick=()=>{atlasSel=null;const sk=SKILL[S.mode];S.atlasSkill=SKILLS[sk]?sk:'loc';openAtlas();};
-$('atlasBack').onclick=()=>{show('atlas',false);atlasMode=false;atlasSel=null;marks.clear();ring(null);paint();show('home');renderHome();};
-$('trainWeak').onclick=()=>{atlasSel=null;if(SKILL[S.mode]!==S.atlasSkill)S.mode=SKILL_MODE[S.atlasSkill];S.format='weak';S.play='solo';persist();startGame();};
-$('resetStats').onclick=async()=>{
-  const v=await iosAlert({title:'Fortschritt zurücksetzen?',message:'Lernstand und alle Rekorde werden gelöscht. Das lässt sich nicht rückgängig machen.',
-    buttons:[{label:'Abbrechen',value:false},{label:'Löschen',value:true,style:'destructive'}]});
-  if(!v)return;for(const k in KN)KN[k]={};BEST={};save('know',KN);save('best',BEST);atlasSel=null;renderHome();toast('Fortschritt gelöscht','var(--accent)');};
+function atlasTap(evt){
+  const sk=S.atlasSkill;
+  if(ATLAS[sk]&&ATLAS[sk].place){
+    const pt=d3.pointer(evt,layer.node()), ll=proj.invert(pt);if(!ll||!isFinite(ll[0]))return;
+    let best=null,bd=Infinity;for(const f of atlasPool(sk)){const d=placeDist(f,ll);if(d<bd){bd=d;best=f;}}
+    const p1=proj(ll),p2=proj([ll[0],Math.min(89,ll[1]+1)]),pxPerKm=Math.hypot(p2[0]-p1[0],p2[1]-p1[1])/111;
+    if(!best||bd>Math.max(60,pxPerKm>0?24/pxPerKm:60))return;
+    atlasSel=best;atlasInfo(best);ring(best);return;
+  }
+  const f=hit(evt);if(!f||!quizzable(f))return;atlasSel=f;atlasInfo(f);ring(f);
+}
+$('atlasCat').onclick=()=>iosMenu($('atlasCat'),Object.entries(ATLAS).map(([k,v])=>({label:`${v.ic}  ${v.name}`,checked:S.atlasSkill===k,
+  onSelect:()=>{S.atlasSkill=k;persist();atlasSel=null;openAtlas();}})),'Kategorie');
+$('openAtlas').onclick=()=>{atlasSel=null;const sk=SKILL[S.mode];S.atlasSkill=ATLAS[sk]?sk:'loc';openAtlas();};
+$('atlasBack').onclick=()=>{show('atlas',false);atlasMode=false;atlasSel=null;marks.clear();ring(null);drawPlaces(null);paint();show('home');renderHome();};
+$('trainWeak').onclick=()=>{atlasSel=null;if(SKILL[S.mode]!==S.atlasSkill)S.mode=ATLAS_MODE[S.atlasSkill];S.format='weak';S.play='solo';persist();
+  drawPlaces(null);startGame();};
 
 /* ---------- backup: export / import progress as JSON ---------- */
 function backupData(){return {app:'atlasjagd',version:1,exported:new Date().toISOString(),know:KN,best:BEST,settings:S};}
