@@ -1,9 +1,88 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#12324A"/>
-  <circle cx="256" cy="256" r="168" fill="#F5EFE0"/>
-  <circle cx="256" cy="256" r="168" fill="none" stroke="#9CC4D4" stroke-width="18"/>
-  <path d="M256 96 L292 256 L256 416 L220 256 Z" fill="#12324A"/>
-  <path d="M256 96 L292 256 L220 256 Z" fill="#E2513F"/>
-  <path d="M96 256 L256 228 L416 256 L256 284 Z" fill="#12324A" opacity=".35"/>
-  <circle cx="256" cy="256" r="22" fill="#FFC23D"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="30%" r="85%">
+      <stop offset="0" stop-color="#2B1E7A"/>
+      <stop offset=".55" stop-color="#140F45"/>
+      <stop offset="1" stop-color="#07061C"/>
+    </radialGradient>
+    <filter id="b90" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="90"/></filter>
+    <filter id="b30" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="30"/></filter>
+    <filter id="b14" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
+    <filter id="b3" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter>
+    <filter id="b6" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+    <radialGradient id="glass" cx="40%" cy="32%" r="78%">
+      <stop offset="0" stop-color="#9FF3FF" stop-opacity=".38"/>
+      <stop offset=".55" stop-color="#3A7CFF" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#1A1060" stop-opacity=".75"/>
+    </radialGradient>
+    <linearGradient id="land" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#C6FF4D"/>
+      <stop offset=".5" stop-color="#2FF0B5"/>
+      <stop offset="1" stop-color="#16B6FF"/>
+    </linearGradient>
+    <linearGradient id="land2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFB13D"/>
+      <stop offset="1" stop-color="#FF3D8B"/>
+    </linearGradient>
+    <linearGradient id="rim" x1=".1" y1="0" x2=".9" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="1"/>
+      <stop offset=".35" stop-color="#fff" stop-opacity=".25"/>
+      <stop offset=".7" stop-color="#fff" stop-opacity=".05"/>
+      <stop offset="1" stop-color="#9FE8FF" stop-opacity=".9"/>
+    </linearGradient>
+    <linearGradient id="pinG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFD36B"/><stop offset=".55" stop-color="#FF7A3D"/><stop offset="1" stop-color="#FF3D7F"/>
+    </linearGradient>
+    <linearGradient id="orbit" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset=".35" stop-color="#fff" stop-opacity=".95"/>
+      <stop offset=".75" stop-color="#FFC56B" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FF5FA2" stop-opacity=".2"/>
+    </linearGradient>
+    <clipPath id="orb"><circle cx="512" cy="530" r="318"/></clipPath>
+    <mask id="front"><rect width="1024" height="1024" fill="#fff"/><rect x="0" y="0" width="1024" height="560" fill="#000" transform="rotate(-18 512 530)"/></mask>
+  <clipPath id="rr"><rect width="1024" height="1024" rx="230"/></clipPath></defs><g clip-path="url(#rr)">
+
+  <rect width="1024" height="1024" rx="230" fill="url(#bg)"/>
+  <!-- colour fields the glass can bend -->
+  <circle cx="230" cy="800" r="260" fill="#FF2E8E" opacity=".55" filter="url(#b90)"/>
+  <circle cx="830" cy="230" r="240" fill="#22D8FF" opacity=".5" filter="url(#b90)"/>
+  <circle cx="820" cy="860" r="200" fill="#7A3DFF" opacity=".55" filter="url(#b90)"/>
+
+  <!-- orbit, back half -->
+  <ellipse cx="512" cy="530" rx="452" ry="128" transform="rotate(-18 512 530)" fill="none" stroke="url(#orbit)" stroke-width="16" opacity=".55"/>
+
+  <!-- the glass globe -->
+  <circle cx="512" cy="566" r="318" fill="#05041A" opacity=".55" filter="url(#b30)"/>
+  <g clip-path="url(#orb)">
+    <circle cx="512" cy="530" r="318" fill="#1B2A9E"/>
+    <!-- vivid continents seen through thick glass (soft, refracted) -->
+    <g filter="url(#b3)">
+      <path d="M250 430c40-110 170-150 250-110 60 30 40 110-20 140-60 30-46 110-116 136-80 30-150-14-150-84 0-34 16-56 36-82z" fill="url(#land)"/>
+      <path d="M600 330c90-40 210 0 250 90 30 70-4 150-82 166-80 16-100 98-180 108-70 8-114-54-88-120 22-56-10-144 30-196 20-24 42-36 70-48z" fill="url(#land)"/>
+      <path d="M470 700c50-28 130-10 160 46 26 52-12 112-72 124-56 10-104-22-112-72-6-42 0-76 24-98z" fill="url(#land)" opacity=".9"/>
+    </g>
+    <circle cx="512" cy="530" r="318" fill="url(#glass)"/>
+    <!-- refraction: bright caustic crescent opposite the light -->
+    <path d="M330 760c120 110 330 120 460 -10 40 -40 64 -90 70 -140 20 120 -60 250 -200 300 -120 44 -250 10 -330 -150z" fill="#BFF6FF" opacity=".6" filter="url(#b14)"/>
+    <!-- big specular -->
+    <ellipse cx="396" cy="356" rx="150" ry="92" transform="rotate(-32 396 356)" fill="#fff" opacity=".7" filter="url(#b30)"/>
+    <ellipse cx="372" cy="330" rx="62" ry="30" transform="rotate(-32 372 330)" fill="#fff" opacity=".95" filter="url(#b6)"/>
+    <!-- inner edge darkening for thickness -->
+    <circle cx="512" cy="530" r="318" fill="none" stroke="#0A0636" stroke-opacity=".55" stroke-width="60" filter="url(#b30)"/>
+  </g>
+  <circle cx="512" cy="530" r="316" fill="none" stroke="url(#rim)" stroke-width="8"/>
+
+  <!-- orbit, front half with a glowing marker riding on it -->
+  <g mask="url(#front)">
+    <ellipse cx="512" cy="530" rx="452" ry="128" transform="rotate(-18 512 530)" fill="none" stroke="url(#orbit)" stroke-width="16"/>
+  </g>
+  <g transform="translate(836 360) rotate(18) scale(1.22)">
+    <ellipse cx="0" cy="98" rx="34" ry="10" fill="#000" opacity=".35" filter="url(#b14)"/>
+    <circle cx="0" cy="-6" r="80" fill="#FF7A3D" opacity=".45" filter="url(#b30)"/>
+    <path d="M0 96C-16 66-62 32-62-10a62 62 0 0 1 124 0C62 32 16 66 0 96z" fill="url(#pinG)"/>
+    <path d="M0 96C-16 66-62 32-62-10a62 62 0 0 1 124 0C62 32 16 66 0 96z" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="5"/>
+    <circle cx="0" cy="-10" r="22" fill="#fff"/>
+    <ellipse cx="-24" cy="-40" rx="22" ry="12" transform="rotate(-30 -24 -40)" fill="#fff" opacity=".8" filter="url(#b3)"/>
+  </g>
+</g></svg>
