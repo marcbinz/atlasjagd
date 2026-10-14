@@ -4,8 +4,8 @@
   "description": "Geografie-Quiz: Länder, Flaggen, Hauptstädte, Flüsse, Berge und Wahrzeichen",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#12324A",
-  "theme_color": "#12324A",
+  "background_color": "#140F45",
+  "theme_color": "#140F45",
   "lang": "de",
   "icons": [
     {

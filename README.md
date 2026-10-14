@@ -4,18 +4,21 @@ Ein Geografie-Quiz für den Browser – optimiert fürs Handy, funktioniert aber
 
 ## Spielmodi
 
-**Länder:** Land finden · Land benennen · Silhouette · Border Hop
-**Flaggen & Hauptstädte:** Flagge auf Karte · Flaggen-Quiz · Hauptstädte
-**Natur & Kultur:** Flüsse · Berge & Gebirge · Wahrzeichen
+**Länder:** Treffer · Rätsel · Schatten · Hops · Provinzen
+**Flaggen & Städte:** Fahnen · Flaggen · Hauptsache · Metropolen
+**Natur & Kultur:** Ströme · Gipfel · Wunder
+**Pins:** Peilung (Punkte nach Entfernung) · Kopf an Kopf (zu zweit, wer pinnt näher?)
 
-Formate: 10 Fragen, Auf Zeit, 3 Leben, Endlos, Schwächen.
-Regionen: Welt, Europa, Afrika, Asien, Nordamerika, Südamerika, Ozeanien.
+Jeder Modus lässt sich **spielen** (10 Fragen, Auf Zeit, 3 Leben, Endlos, Schwächen) oder **lernen**: endlos, mit Serie, Quote und fünf Schwierigkeitsstufen, die nacheinander freigeschaltet werden.
 
 ## Features
 
 - **Clever wiederholen:** Für jedes Land und jede Fähigkeit (Lage, Flagge, Hauptstadt, Umriss, …) wird ein Lernstand gespeichert. Unbekanntes kommt oft, Gewusstes kaum noch.
+- **Wiederholen:** Gelernte Orte kommen nach festen Abständen (1, 3, 7, 16 … Tage) zur Wiederholung zurück.
+- **Ortsfilter:** Kleinstaaten, abhängige und umstrittene Gebiete einzeln zu- oder abschaltbar.
+- **Rekorde:** Bestwerte je Modus, Region und Format.
 - **Mein Atlas:** Fortschrittskarte; Länder lassen sich als „gewusst“ markieren.
-- **Duelle:** Zu zweit auf einem Handy (gleiche Fragen nacheinander) oder per Duell-Code auf zwei Handys.
+- **Duelle:** Zu zweit auf einem Handy, „Kopf an Kopf“ beim Pinnen, oder als **Live-Duell auf zwei Handys**: Einer zeigt einen QR-Code, das Gegenüber scannt ihn unter „Duell beitreten“ und zeigt einen Antwort-Code zurück. Danach startet ihr gleichzeitig mit denselben Fragen und seht die Punkte des anderen live. Die Verbindung läuft direkt zwischen den Handys (WebRTC), ohne Server – am zuverlässigsten im selben WLAN.
 - **Kartenstile:** Klassisch, Flaggen, Bunt, Kontinente, Nacht, Retro, Blindkarte.
 - **Projektionen:** Natural Earth, Equal Earth, Mercator, Globus. Flache Karten sind endlos scrollbar.
 
