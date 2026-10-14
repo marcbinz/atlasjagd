@@ -18,7 +18,7 @@ Jeder Modus lässt sich **spielen** (10 Fragen, Auf Zeit, 3 Leben, Endlos, Schw�
 - **Ortsfilter:** Kleinstaaten, abhängige und umstrittene Gebiete einzeln zu- oder abschaltbar.
 - **Rekorde:** Bestwerte je Modus, Region und Format.
 - **Mein Atlas:** Fortschrittskarte; Länder lassen sich als „gewusst“ markieren.
-- **Duelle:** Zu zweit auf einem Handy, „Kopf an Kopf“ beim Pinnen, oder als **Live-Duell auf zwei Handys**: Einer zeigt einen QR-Code, das Gegenüber scannt ihn unter „Duell beitreten“ und zeigt einen Antwort-Code zurück. Danach startet ihr gleichzeitig mit denselben Fragen und seht die Punkte des anderen live. Die Verbindung läuft direkt zwischen den Handys (WebRTC), ohne Server – am zuverlässigsten im selben WLAN.
+- **Duelle:** Zu zweit auf einem Handy, „Kopf an Kopf“ beim Pinnen, oder als **Live-Duell auf zwei Handys**: Einer zeigt einen QR-Code, das Gegenüber scannt ihn unter „Duell beitreten“ und zeigt einen Antwort-Code zurück. Danach startet ihr gleichzeitig mit denselben Fragen – entweder jeder in seinem Tempo mit Live-Punkten oder in gemeinsamen Runden mit Auflösung nach jeder Frage. Bricht die Verbindung ab, lässt sie sich mitten im Spiel neu aufbauen. Die Verbindung läuft direkt zwischen den Handys (WebRTC), ohne Server – am zuverlässigsten im selben WLAN.
 - **Kartenstile:** Klassisch, Flaggen, Bunt, Kontinente, Nacht, Retro, Blindkarte.
 - **Projektionen:** Natural Earth, Equal Earth, Mercator, Globus. Flache Karten sind endlos scrollbar.
 

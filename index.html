@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Atlasjagd</title>
 <script>if(navigator.standalone||matchMedia('(display-mode: standalone)').matches)document.documentElement.classList.add('standalone')</script>
@@ -521,6 +521,23 @@ body.noborders .c,body.noborders .micro{stroke:transparent}
 #countdown{position:fixed;inset:0;z-index:90;display:none;place-items:center;font:800 120px var(--font);color:var(--tint);pointer-events:none;
   text-shadow:0 6px 30px rgba(0,0,0,.25)}
 #countdown.on{display:grid}
+html{touch-action:manipulation}
+.bar.stack{display:flex;gap:2px;background:none;height:10px}
+.bar.stack i{display:block;height:100%;border-radius:999px;min-width:0;transition:width .5s var(--ease)}
+.bar.stack i[style*="width:0%"]{display:none}
+.sg-good,.bar.stack i.sg-good{background:var(--good)} .sg-target,.bar.stack i.sg-target{background:var(--target)} .sg-bad,.bar.stack i.sg-bad{background:var(--bad)} .sg-new,.bar.stack i.sg-new{background:color-mix(in srgb,var(--l1) 14%,transparent)}
+#atlasLegend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.waitopp,.oppline{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:14px;color:var(--l2)}
+.waitopp .spin{width:14px;height:14px;border-radius:50%;border:2.5px solid var(--sep);border-top-color:#F08A24;animation:spin .8s linear infinite}
+.oppline b{color:#C96A10}
+#choices button.opppick{box-shadow:inset 0 0 0 3px #F08A24}
+#choices button{position:relative}
+.oppbadge{position:absolute;top:-8px;right:8px;background:#F08A24;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px}
+.c.opp,.micro.opp{fill:#F6B26B}
+.mlabel.opp{fill:#B4560A}
+.oppsc{position:relative}
+.oppsc.lost{background:color-mix(in srgb,var(--red) 18%,transparent);color:var(--red);font:inherit;font-weight:700;cursor:pointer}
+.oppsc .plus{position:absolute;right:4px;top:-4px;font-size:12px;font-weight:800;color:#C96A10;pointer-events:none}
 </style>
 </head>
 <body>
@@ -671,6 +688,8 @@ body.noborders .c,body.noborders .micro{stroke:transparent}
         <div class="sechead">Live-Duell</div>
         <div class="group"><label class="cell field"><span class="lbl">Dein Name</span><input id="myName" maxlength="16" autocomplete="off" placeholder="optional" aria-label="Dein Name"></label>
           <label class="cell field" hidden><input id="codeIn" placeholder="Code eingeben (optional)" autocapitalize="characters" autocomplete="off" spellcheck="false" aria-label="Duell-Code"></label></div>
+        <div class="seg" id="syncSeg" style="margin-top:14px"></div>
+        <p class="footer" id="syncFoot"></p>
         <p class="footer">Ihr spielt gleichzeitig auf zwei Handys: Du zeigst einen QR-Code, dein Gegenüber scannt ihn unter „Duell beitreten“ und zeigt dir einen Antwort-Code. Danach startet ihr zusammen – gleiche Fragen, Punkte live. Am besten im selben WLAN.</p>
       </div>
     </div>
@@ -749,8 +768,8 @@ body.noborders .c,body.noborders .micro{stroke:transparent}
   <div class="sheet-body">
     <button class="pulldown" id="atlasCat" aria-haspopup="menu"></button>
     <p class="footnote" id="atlasSum"></p>
-    <div class="bar"><i id="atlasBar"></i></div>
-    <div class="legend"><span><i style="background:var(--good)"></i>Sitzt</span><span><i style="background:var(--target)"></i>Wackelt</span><span><i style="background:var(--bad)"></i>Üben</span><span><i style="background:var(--land)"></i>Neu</span></div>
+    <div class="bar stack" id="atlasStack"></div>
+    <div class="legend" id="atlasLegend"></div>
     <div class="group pad" id="atlasInfo"></div>
     <button class="btn filled big" id="trainWeak">Schwächen trainieren</button>
   </div>
@@ -1063,6 +1082,11 @@ if(/[?&]debug\b/.test(location.search))addEventListener('load',()=>{
       `iOS      ${(navigator.userAgent.match(/OS [\d_]+/)||[''])[0]}`].join('\n');};
   upd();addEventListener('resize',upd);setInterval(upd,1000);
 });
+/* ---------- no page zoom: a zoomed page shifts every tap against the map ---------- */
+['gesturestart','gesturechange','gestureend'].forEach(n=>document.addEventListener(n,e=>e.preventDefault(),{passive:false}));
+function unzoom(){const v=window.visualViewport;if(!v||v.scale<1.01)return;const m=document.querySelector('meta[name="viewport"]'),c=m.content;
+  m.content=c.replace(/maximum-scale=[^,]*/,'maximum-scale=1.0001');requestAnimationFrame(()=>{m.content=c;});}
+if(window.visualViewport)visualViewport.addEventListener('resize',()=>{if(visualViewport.scale>1.01)setTimeout(unzoom,250);});
 /* ---------- native-style motion & components ---------- */
 addEventListener('keydown',e=>{if(e.key==='Tab'||e.key.startsWith('Arrow')||e.key==='Enter')document.documentElement.classList.add('kbd');},true);
 addEventListener('pointerdown',()=>document.documentElement.classList.remove('kbd'),true);
@@ -1430,6 +1454,8 @@ function renderHome(){
   $('suddenGroup').style.display=FMT()==='endless'?'':'none';
   $('hotseatBox').style.display=S.play==='hotseat'||clashM?'':'none';
   $('codeBox').style.display=S.play==='live'&&!clashM?'':'none';
+  segmented('syncSeg',{free:'Jeder für sich',sync:'Gemeinsame Runden'},S.liveSync?'sync':'free',k=>{S.liveSync=k==='sync';persist();renderHome();});
+  $('syncFoot').textContent=S.liveSync?(S.mode==='borderhop'?'Bei Hops spielt jeder in seinem Tempo.':'Jede Frage gemeinsam: Erst wenn beide geantwortet haben, seht ihr die Antwort des anderen und die Punkte – dann geht es zusammen weiter.'):'Jeder spielt in seinem Tempo, die Punkte des anderen siehst du live.';
   if(document.activeElement!==$('p1'))$('p1').value=S.p1;
   if(document.activeElement!==$('myName'))$('myName').value=myName();
   if(document.activeElement!==$('p2'))$('p2').value=S.p2;
@@ -1481,7 +1507,7 @@ function startGame(){
   beginRound();
 }
 function beginRound(){
-  refit();drawLayers();
+  unzoom();refit();drawLayers();
   const rev=REVIEW, clash=S.mode==='clash';
   const learn=!rev&&!clash&&S.kind==='learn'&&!DUEL, L=learn?learnData():null;
   const duel=!!DUEL, sk=SKILL[S.mode];let P=rev?rev.items:learn?learnPool(L):pool();
@@ -1519,8 +1545,8 @@ function hud(){
   $('hudMid').textContent=FMT()==='time'?`⏱ ${Math.max(0,G.time)} s`:FMT()==='lives'?'♥'.repeat(Math.max(0,G.lives))+'♡'.repeat(3-Math.max(0,G.lives)):
     G.total?`${G.history.length} / ${G.total}`:G.sudden?`Sudden Death · ${G.history.length}`:`Endlos · ${G.history.length}`;
   const lv=DUEL&&DUEL.kind==='live'&&LIVE?LIVE.opp:null;
-  $('hudScore').innerHTML=(G.player?esc(G.player)+' · ':'')+`✓ ${fmt(G.score)}`+(lv?`<span class="oppsc${lv.done?' done':''}" title="${esc(lv.name)}">${esc(shortName(lv.name))} ${fmt(lv.score)}</span>`:G.streak>=3?`<span class="streak">🔥${G.streak}</span>`:'');fitStatus();
-  if(lv)liveProgress();
+  $('hudScore').innerHTML=(G.player?esc(G.player)+' · ':'')+`✓ ${fmt(G.score)}`+(lv?(LIVE.lost&&!LIVE.left?`<button class="oppsc lost" id="reconBtn" aria-label="Neu verbinden">⚠︎ Verbinden</button>`:`<span class="oppsc${lv.done?' done':''}" id="oppScore" title="${esc(lv.name)}">${esc(shortName(lv.name))} <b>${fmt(lv.score)}</b></span>`):G.streak>=3?`<span class="streak">🔥${G.streak}</span>`:'');fitStatus();
+  if(lv){liveProgress();const rb=$('reconBtn');if(rb)rb.onclick=liveReconnect;}
 }
 // keep the status pill on one line: drop the least important bits on narrow screens
 function fitStatus(){const s=document.querySelector('#hud .status');s.classList.remove('tight','tighter');
@@ -1568,6 +1594,7 @@ function reveal(f){
   marks.set(f.uid,'good');paint();ring(f);zoomToFeature(f);
 }
 function after(ok){
+  if(liveSyncOn()){liveSyncMine(ok);return;}
   if(G.sudden&&!ok){setTimeout(endGame,1500);return;}
   if(FMT()==='lives'&&G.lives<=0){setTimeout(endGame,1500);return;}
   if(ok||FMT()==='time'||S.speed){const d=FMT()==='time'?(ok?500:1100):S.speed?(ok?450:1400):(['place','mc'].includes(CAT[S.mode])&&S.mode!=='name'&&S.mode!=='capital')?1400:900;
@@ -1610,7 +1637,7 @@ function answerChoice(o,btn){
   select({kind:'mc',o,btn});
 }
 function answerNow(o,btn){
-  if(!G||G.locked)return;
+  if(!G||G.locked)return;G.lastPick={uid:o.uid};
   const btns=[...$('choices').children];btns.forEach(b=>b.disabled=true);
   const good=btns.find(b=>b.dataset.uid===G.target.uid);
   if(o===G.target){btn.classList.add('good');correct();}
@@ -1626,7 +1653,7 @@ function placeTap(evt){
   select({kind:'place',d,tol,ll});
 }
 function placeResult(f,d,tol,ll){
-  tapDot(ll,false);
+  tapDot(ll,false);G.lastPick={ll};
   if(d<=tol)correct(d>5?` · ${fmt(Math.round(d))} km daneben`:'');
   else{wrong(null,d);if(f.kind==='state'){const o=G&&G.P.find(x=>x!==f&&d3.geoContains(x,ll));if(o)label(o,'no');}}
 }
@@ -1645,7 +1672,7 @@ function select(s){
 function fitCardMotion(c){if(c.animate&&S.anim!==false&&!RM)c.animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:260,easing:EASE});}
 function confirmSel(){
   if(!G||G.locked||!G.pending)return;const s=G.pending;G.pending=null;$('confirm').style.display='none';
-  if(s.kind==='tap'){if(s.f)marks.delete(s.f.uid);tapDot(null);s.ok?correct():wrong(s.f);}
+  if(s.kind==='tap'){if(s.f)marks.delete(s.f.uid);tapDot(null);G.lastPick={uid:s.f?s.f.uid:null,ll:s.ll||null};s.ok?correct():wrong(s.f);}
   else if(s.kind==='place')placeResult(G.target,s.d,s.tol,s.ll);
   else if(s.kind==='mc'){s.btn.classList.remove('picked');answerNow(s.o,s.btn);}
   else if(s.kind==='pin')pinDone(s.ll);
@@ -1771,6 +1798,7 @@ function pinDone(ll){
   pinLine(ll,tc,'p1');pinMark(ll,'p1');ring(f);label(f,'ok');pinZoom([ll,tc]);
   $('feedback').innerHTML=`${fmt(Math.round(d))} km daneben · <b>+${pts}</b>`;
   toast(pts>=900?`Volltreffer · +${pts}`:`+${pts} Punkte`,pts>=700?'var(--good)':pts>=300?'var(--accent)':'var(--bad)');hud();
+  G.lastPick={ll};if(liveSyncOn()){liveSyncMine(ok);return;}
   if(G.sudden&&!ok){setTimeout(endGame,1600);return;}
   if(FMT()==='lives'&&G.lives<=0){setTimeout(endGame,1600);return;}
   if(FMT()==='time'||S.speed){setTimeout(()=>{if(G&&G.locked)nextQ();},S.speed?1500:1100);return;}
@@ -1866,7 +1894,7 @@ svg.on('click',evt=>{
   if(c==='hop')return hopTap(hit(evt));
   const f=hit(evt);
   const ok=f===G.target||nearTarget(evt,G.target);
-  if(S.speed){ok?correct():wrong(f);return;}
+  if(S.speed){const ll0=proj.invert(d3.pointer(evt,layer.node()));G.lastPick={uid:f?f.uid:null,ll:ll0&&isFinite(ll0[0])?ll0:null};ok?correct():wrong(f);return;}
   const pt=d3.pointer(evt,layer.node()), ll=proj.invert(pt);
   if(!f&&!(ll&&isFinite(ll[0])))return;
   select({kind:'tap',f,ok,ll});
@@ -2090,7 +2118,7 @@ function wireDC(dc){dc.onopen=liveOpen;dc.onmessage=e=>{try{liveMsg(JSON.parse(e
 function liveSend(o){try{if(LIVE&&LIVE.dc&&LIVE.dc.readyState==='open')LIVE.dc.send(JSON.stringify(o));}catch(e){}}
 function watchPC(pc){pc.addEventListener('connectionstatechange',()=>{if(LIVE&&LIVE.pc===pc&&pc.connectionState==='failed')liveFail();});}
 function liveEnd(silent){if(!LIVE)return;if(!silent)liveSend({t:'bye'});try{LIVE.dc&&LIVE.dc.close();}catch(e){}try{LIVE.pc.close();}catch(e){}LIVE=null;}
-function liveCancel(){liveEnd();show('live',false);}
+function liveCancel(){if(LIVE&&LIVE.reconnect){LIVE.reconnect=false;LIVE.lost=true;try{LIVE.pc.close();}catch(e){}show('live',false);if(G){G.paused=false;hud();}if($('result').classList.contains('show'))liveResult();return;}liveEnd();show('live',false);}
 $('liveCancel').onclick=liveCancel;
 function liveDesc(){return codeDesc(readCode(LIVE.code));}
 function renderLive(){
@@ -2117,12 +2145,15 @@ function renderLive(){
   const rt=$('liveRetry');if(rt)rt.onclick=()=>liveHost();
   requestAnimationFrame(()=>{});
 }
-async function liveHost(){
+async function liveHost(reconnect){
   if(!window.RTCPeerConnection){toast('Dieses Gerät kann keine Live-Duelle','var(--bad)');return;}
-  liveEnd(true);
-  const seed=Math.random()*2e9|0, code=makeCode(seed), pc=new RTCPeerConnection(RTC_CFG), dc=pc.createDataChannel('aj',{ordered:true});
-  LIVE={role:'host',pc,dc,seed,code,opp:{name:'',score:0,done:false},state:'prep'};wireDC(dc);watchPC(pc);
-  $('liveBody').innerHTML='<div class="livestat"><span class="spin"></span>Duell wird vorbereitet …</div>';show('opts',false);show('live');
+  let keep=null;
+  if(reconnect&&LIVE){keep=LIVE;try{keep.pc.close();}catch(e){}}else{liveEnd(true);
+    if(liveWantsSync()&&(S.format==='time'||S.format==='weak')){S.format='ten';persist();toast('Gemeinsame Runden: 10 Fragen','var(--accent)');}}
+  const seed=keep?keep.seed:Math.random()*2e9|0, code=keep?keep.code:makeCode(seed), pc=new RTCPeerConnection(RTC_CFG), dc=pc.createDataChannel('aj',{ordered:true});
+  LIVE=keep?Object.assign(keep,{pc,dc,state:'prep',reconnect:true}):{role:'host',pc,dc,seed,code,opp:{name:'',score:0,done:false},state:'prep',oppAns:{}};wireDC(dc);watchPC(pc);
+  if(keep&&G)G.paused=true;
+  $('liveBody').innerHTML=`<div class="livestat"><span class="spin"></span>${keep?'Neue Verbindung wird vorbereitet …':'Duell wird vorbereitet …'}</div>`;show('opts',false);show('live');
   try{await pc.setLocalDescription(await pc.createOffer());await gathered(pc);
     if(!LIVE||LIVE.pc!==pc)return;
     LIVE.offerURL=shareURL({aj:'live',c:code,n:myName(),o:await packSDP(pc.localDescription.sdp)});LIVE.state='offer';renderLive();}
@@ -2131,9 +2162,16 @@ async function liveHost(){
 async function liveJoin(info){
   const c=readCode(info.code);if(!c)return;
   if(!window.RTCPeerConnection){toast('Dieses Gerät kann keine Live-Duelle','var(--bad)');return;}
+  const keep=LIVE&&LIVE.role==='guest'&&LIVE.lost&&LIVE.code.toUpperCase()===info.code.toUpperCase()?LIVE:null;
+  if(keep){try{keep.pc.close();}catch(e){}const pc=new RTCPeerConnection(RTC_CFG);Object.assign(keep,{pc,dc:null,state:'prep',reconnect:true});
+    pc.ondatachannel=e=>{if(LIVE&&LIVE.pc===pc){LIVE.dc=e.channel;wireDC(e.channel);}};watchPC(pc);if(G)G.paused=true;
+    $('liveBody').innerHTML='<div class="livestat"><span class="spin"></span>Neue Verbindung wird vorbereitet …</div>';show('live');
+    try{await pc.setRemoteDescription({type:'offer',sdp:await unpackSDP(info.o)});await pc.setLocalDescription(await pc.createAnswer());await gathered(pc);
+      if(!LIVE||LIVE.pc!==pc)return;LIVE.answerURL=shareURL({aj:'ans',n:myName(),a:await packSDP(pc.localDescription.sdp)});LIVE.state='answer';renderLive();}catch(e){liveFail();}
+    return;}
   liveEnd(true);
   const pc=new RTCPeerConnection(RTC_CFG);
-  LIVE={role:'guest',pc,dc:null,seed:c.seed,code:info.code,opp:{name:info.name||'',score:0,done:false},state:'prep'};
+  LIVE={role:'guest',pc,dc:null,seed:c.seed,code:info.code,opp:{name:info.name||'',score:0,done:false},state:'prep',oppAns:{}};
   pc.ondatachannel=e=>{if(LIVE&&LIVE.pc===pc){LIVE.dc=e.channel;wireDC(e.channel);}};watchPC(pc);
   Object.assign(S,{mode:c.mode,region:c.region,format:c.format,fSmall:c.fSmall,fDep:c.fDep,fDisp:c.fDisp,kind:'play',play:'live'});if(c.cc)S.stateCountry=c.cc;persist();
   ['opts','result','atlas','qrs'].forEach(id=>show(id,false));navReset();
@@ -2150,45 +2188,88 @@ async function liveAnswer(info){
   try{await LIVE.pc.setRemoteDescription({type:'answer',sdp:await unpackSDP(info.a)});}catch(e){liveFail();return;}
   const pc=LIVE.pc;setTimeout(()=>{if(LIVE&&LIVE.pc===pc&&LIVE.state==='connecting')liveFail();},15000);
 }
-function liveFail(){if(!LIVE)return;LIVE.state='failed';if($('live').classList.contains('show'))renderLive();else toast('Verbindung zum Gegner getrennt','var(--bad)');}
-function liveOpen(){if(!LIVE)return;LIVE.state='ready';liveSend({t:'hello',n:myName()});renderLive();}
-function liveClosed(){if(!LIVE)return;const wasPlaying=G&&DUEL&&DUEL.kind==='live';LIVE.lost=true;
+function liveFail(){if(!LIVE)return;if(LIVE.reconnect){LIVE.lost=true;}LIVE.state='failed';if($('live').classList.contains('show'))renderLive();else toast('Verbindung zum Gegner getrennt','var(--bad)');}
+function liveOpen(){if(!LIVE)return;
+  if(LIVE.reconnect){LIVE.reconnect=false;LIVE.lost=false;LIVE.state=G?'go':'done';liveSend({t:'hello',n:myName()});show('live',false);if(G){G.paused=false;LIVE.sent='';hud();}
+    if(LIVE.myAns)liveSend(Object.assign({t:'ans'},LIVE.myAns.msg));if(LIVE.me)liveSend({t:'done',s:LIVE.me.score,x:LIVE.me.max});
+    toast('Wieder verbunden','var(--good)');if($('result').classList.contains('show'))liveResult();liveSyncCheck();return;}
+  LIVE.state='ready';liveSend({t:'hello',n:myName()});renderLive();}
+function liveClosed(){if(!LIVE||LIVE.reconnect)return;const wasPlaying=G&&DUEL&&DUEL.kind==='live';LIVE.lost=true;if(G)hud();if($('result').classList.contains('show'))liveResult();liveSyncCheck();
   if(wasPlaying)toast(`${LIVE.opp.name||'Dein Gegner'} ist nicht mehr verbunden`,'var(--bad)');else if(LIVE.state!=='failed')liveFail();}
 function liveMsg(m){
   if(!LIVE)return;
   if(m.t==='hello'){if(m.n)LIVE.opp.name=m.n;renderLive();}
-  else if(m.t==='start'){LIVE.seed=m.seed;LIVE.code=m.code;const c=readCode(m.code);
+  else if(m.t==='start'){LIVE.seed=m.seed;LIVE.code=m.code;LIVE.sync=!!m.sync;const c=readCode(m.code);
     if(c){Object.assign(S,{mode:c.mode,region:c.region,format:c.format,fSmall:c.fSmall,fDep:c.fDep,fDisp:c.fDisp,kind:'play',play:'live'});if(c.cc)S.stateCountry=c.cc;persist();}
     liveCountdown();}
-  else if(m.t==='prog'){LIVE.opp.score=m.s;LIVE.opp.i=m.i;if(G)hud();}
+  else if(m.t==='prog'){if(LIVE.sync)return;LIVE.opp.score=m.s;LIVE.opp.i=m.i;if(G)hud();}
+  else if(m.t==='ans'){LIVE.oppAns[m.i]=m;if(G)liveSyncCheck();}
   else if(m.t==='done'){Object.assign(LIVE.opp,{score:m.s,max:m.x,done:true});if(G)hud();if(LIVE.me&&$('result').classList.contains('show'))liveResult();}
   else if(m.t==='again'){if(LIVE.role==='host')iosAlert({title:`${LIVE.opp.name||'Dein Gegner'} will eine Revanche`,message:'Gleicher Modus, neue Fragen.',
       buttons:[{label:'Später',value:false},{label:'Los',value:true,style:'default'}]}).then(v=>{if(v)liveRematch();});}
-  else if(m.t==='bye'){LIVE.lost=true;toast(`${LIVE.opp.name||'Dein Gegner'} hat das Duell verlassen`,'var(--accent)');}
+  else if(m.t==='bye'){LIVE.lost=true;LIVE.left=true;liveSyncCheck();toast(`${LIVE.opp.name||'Dein Gegner'} hat das Duell verlassen`,'var(--accent)');}
 }
-function liveStartPressed(){if(!LIVE||LIVE.role!=='host'||LIVE.state!=='ready')return;liveSend({t:'start',seed:LIVE.seed,code:LIVE.code});liveCountdown();}
+function liveStartPressed(){if(!LIVE||LIVE.role!=='host'||LIVE.state!=='ready')return;LIVE.sync=liveWantsSync();liveSend({t:'start',seed:LIVE.seed,code:LIVE.code,sync:LIVE.sync});liveCountdown();}
 function liveCountdown(){
-  if(!LIVE)return;LIVE.state='count';LIVE.opp.score=0;LIVE.opp.done=false;LIVE.me=null;LIVE.sent='';
+  if(!LIVE)return;LIVE.state='count';LIVE.opp.score=0;LIVE.opp.done=false;LIVE.me=null;LIVE.sent='';LIVE.oppAns={};LIVE.myAns=null;
   ['live','result','opts','qrs','scan'].forEach(id=>show(id,false));stopScan();
   const el=$('countdown');let n=3;el.textContent=n;el.classList.add('on');
   const tick=()=>{if(--n>0){el.textContent=n;el.animate&&el.animate([{transform:'scale(1.4)',opacity:0},{transform:'scale(1)',opacity:1}],{duration:300,easing:EASE});setTimeout(tick,800);}
     else{el.textContent='Los!';setTimeout(()=>{el.classList.remove('on');if(!LIVE)return;LIVE.state='go';startGame();},450);}};
   el.animate&&el.animate([{transform:'scale(1.4)',opacity:0},{transform:'scale(1)',opacity:1}],{duration:300,easing:EASE});setTimeout(tick,800);
 }
-function liveProgress(){if(!G||!LIVE)return;const k=G.score+'|'+G.history.length;if(LIVE.sent===k)return;LIVE.sent=k;liveSend({t:'prog',s:G.score,i:G.history.length});}
+function liveWantsSync(){return !!S.liveSync&&S.mode!=='borderhop';}
+function liveSyncOn(){return !!(G&&DUEL&&DUEL.kind==='live'&&LIVE&&LIVE.sync);}
+function liveReconnect(){if(!LIVE)return;
+  if(LIVE.role==='host')liveHost(true);
+  else{toast(`Lass ${LIVE.opp.name||'dein Gegenüber'} „Neu verbinden“ tippen und scanne den Code`,'var(--accent)');openScan('Neu verbinden');}}
+// synced rounds: answer, wait for the other, reveal both, then move on together
+function liveSyncMine(ok){
+  const L=LIVE,i=G.history.length,msg={i,ok,pick:G.lastPick||null,s:G.score};
+  L.myAns={i,ok,msg,endAfter:(G.sudden&&!ok)||(FMT()==='lives'&&G.lives<=0)};liveSend(Object.assign({t:'ans'},msg));
+  $('next').style.display='none';
+  $('feedback').insertAdjacentHTML('beforeend',`<span class="waitopp" id="waitOpp"><span class="spin"></span>Warte auf ${esc(L.opp.name||'Gegner')} …</span>`);
+  liveSyncCheck();
+}
+function liveSyncCheck(){
+  if(!liveSyncOn())return;const L=LIVE,m=L.myAns;if(!m||m.revealed)return;
+  const o=L.oppAns[m.i], gone=L.opp.done||L.lost;
+  if(!o&&!gone)return;
+  m.revealed=true;const w=$('waitOpp');if(w)w.remove();
+  if(o)liveReveal(o);else $('feedback').insertAdjacentHTML('beforeend',`<span class="oppline">${esc(L.opp.name||'Gegner')} ${L.opp.done?'ist schon fertig':'ist nicht verbunden'}</span>`);
+  setTimeout(()=>{if(!G||!G.locked)return;L.myAns=null;if(m.endAfter)endGame();else nextQ();},o?(S.speed?1700:2700):900);
+}
+function oppLabel(ll,text){if(!ll)return;gL.append('text').datum({focus:ll,cent:ll}).attr('class','mlabel opp').attr('dy',-14).text(text);placeMarks();}
+function liveReveal(o){
+  const L=LIVE,f=G.target,nm=L.opp.name||'Gegner',pick=o.pick||{},c=CAT[S.mode];let extra='';
+  if(c==='mc'){const b=[...$('choices').children].find(x=>x.dataset.uid===pick.uid);if(b){b.classList.add('opppick');b.insertAdjacentHTML('beforeend',`<span class="oppbadge">${esc(shortName(nm))}</span>`);}}
+  else if(c==='tap'){const pf=pick.uid&&byId.get(pick.uid);
+    if(pf&&pf!==f){marks.set(pf.uid,'opp');paint();oppLabel(pf.focus,nm);}else if(pf===f)oppLabel(f.focus,`${nm} ✓`);else if(pick.ll){pinMark(pick.ll,'p2');oppLabel(pick.ll,nm);}}
+  else if(pick.ll){const tc=f.geometry.type==='Point'?f.geometry.coordinates:f.focus;pinMark(pick.ll,'p2');pinLine(pick.ll,tc,'p2');oppLabel(pick.ll,nm);
+    const km=c==='peil'?d3.geoDistance(pick.ll,tc)*6371:placeDist(f,pick.ll);extra=` · ${fmt(Math.round(km))} km`;}
+  const before=L.opp.score,d=o.s-before;L.opp.score=o.s;
+  $('feedback').insertAdjacentHTML('beforeend',`<span class="oppline"><span class="pc2">●</span> ${esc(nm)}: ${o.ok?'richtig':'daneben'}${extra}${d>0?` · <b>+${fmt(d)}</b>`:''}</span>`);
+  hud();const el=$('oppScore');
+  if(el&&d>0){const b=el.querySelector('b');const t0=performance.now(),dur=700;
+    const step=n=>{const k=Math.min(1,(n-t0)/dur);b.textContent=fmt(Math.round(before+d*(1-Math.pow(1-k,3))));if(k<1)requestAnimationFrame(step);};requestAnimationFrame(step);
+    const chip=document.createElement('span');chip.className='plus';chip.textContent='+'+fmt(d);el.appendChild(chip);
+    chip.animate?chip.animate([{transform:'translateY(4px)',opacity:0},{transform:'translateY(-14px)',opacity:1,offset:.3},{transform:'translateY(-26px)',opacity:0}],{duration:1300,easing:'ease-out'}).finished.then(()=>chip.remove()):setTimeout(()=>chip.remove(),1300);}
+}
+function liveProgress(){if(!G||!LIVE||LIVE.sync)return;const k=G.score+'|'+G.history.length;if(LIVE.sent===k)return;LIVE.sent=k;liveSend({t:'prog',s:G.score,i:G.history.length});}
 function liveResult(g){
   const L=LIVE;if(!L)return;const me=L.me||{score:g?g.score:0}, o=L.opp, nm=esc(o.name||'Gegner');
   $('resTitle').textContent=`Live-Duell · ${MODES[S.mode].name} · ${regionName()}`;
   $('resScore').innerHTML=`<span class="duel"><span><small>Du</small>${fmt(me.score)}</span><span class="vs">:</span><span><small>${nm}</small>${o.done?fmt(o.score):'…'}</span></span>`;
   $('resLine').textContent=o.done?(me.score===o.score?'Unentschieden – Revanche?':me.score>o.score?'🏆 Du gewinnst!':`${o.name||'Dein Gegner'} gewinnt`):L.lost?'Verbindung getrennt – kein Endergebnis vom Gegner.':`${o.name||'Dein Gegner'} spielt noch …`;
   $('duelBox').style.display='none';if(g)missedList(g.missed);
-  $('again').textContent=L.role==='host'?'Revanche':'Revanche anfragen';
+  $('again').textContent=L.lost&&!L.left?'Neu verbinden':L.role==='host'?'Revanche':'Revanche anfragen';
   show('result');
 }
 function liveRematch(){
+  if(LIVE&&LIVE.lost&&!LIVE.left){liveReconnect();return;}
   if(!LIVE||LIVE.lost){toast('Keine Verbindung mehr – ladet euch neu ein','var(--bad)');return;}
   if(LIVE.role!=='host'){liveSend({t:'again'});toast('Anfrage gesendet','var(--accent)');return;}
-  LIVE.seed=Math.random()*2e9|0;LIVE.code=makeCode(LIVE.seed);liveSend({t:'start',seed:LIVE.seed,code:LIVE.code});liveCountdown();
+  LIVE.seed=Math.random()*2e9|0;LIVE.code=makeCode(LIVE.seed);LIVE.sync=liveWantsSync();liveSend({t:'start',seed:LIVE.seed,code:LIVE.code,sync:LIVE.sync});liveCountdown();
 }
 
 setTimeout(()=>{if(/[#&]aj=/.test(location.hash)){const h=location.href;history.replaceState(null,'',location.href.split('#')[0]);handleShared(h,false);}},700);
@@ -2212,7 +2293,9 @@ function openAtlas(){
   paint();if(!atlasSel){ring(null);resetView();}
   const m=mastered(sk,P);
   $('atlasSum').textContent=`${A.name} in ${regionName()}: ${m} von ${P.length} sitzen sicher.`;
-  $('atlasBar').style.width=(P.length?m/P.length*100:0)+'%';
+  {const c={good:0,target:0,bad:0,new:0};P.forEach(f=>c[level(sk,f)||'new']++);const pc=k=>P.length?c[k]/P.length*100:0;
+   $('atlasStack').innerHTML=['good','target','bad','new'].map(k=>`<i class="sg-${k}" style="width:${pc(k)}%"></i>`).join('');
+   $('atlasLegend').innerHTML=[['good','Sitzt'],['target','Wackelt'],['bad','Üben'],['new','Neu']].map(([k,n])=>`<span><i class="sg-${k}"></i>${n} ${c[k]}</span>`).join('');}
   if(atlasSel)atlasInfo(atlasSel);
   else $('atlasInfo').innerHTML=`<p class="tag" style="margin:0">Tippe auf ${A.place?'einen Ort':'ein Land'}. Kennst du es sicher, markiere es als gewusst – dann kommt es kaum noch dran.</p>`;
 }
